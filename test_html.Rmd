@@ -5,7 +5,6 @@ date: "August 6, 2018"
 output: html_document
 editor_options: 
   chunk_output_type: console
-  keep_md: true
 ---
 
 ```{r setup, include = FALSE}
