@@ -33,7 +33,7 @@ I created a working copy to avoid manipulating the original file since it takes 
 ```{r import, eval = F}
 
 # Importing the shapefile
-seeding_shapefile <- readOGR(dsn = "C:/Users/EricCoronel/Documents/various_DS_projects/Ag_Machine_Pass_Numbering/seeding_shapefile", layer = "Merriweather Farms-JT-01-Corn", pointDropZ = TRUE)
+seeding_shapefile <- readOGR(dsn = "C:/Users/EricCoronel/Documents/various_DS_projects/Ag_Machine_Pass_Numbering/primitives/seeding_shapefile", layer = "Merriweather Farms-JT-01-Corn", pointDropZ = TRUE)
 
 # Working copy
 work_copy <- seeding_shapefile
@@ -135,3 +135,6 @@ ggplot(work_copy@data, aes(x = coords.x1, y = coords.x2, color = pass_scramble))
        color = "Passes \n (order was randomized)")
 
 ```
+![Plotting a subset of passes](C:/Users/EricCoronel/Documents/various_DS_projects/Ag_Machine_Pass_Numbering/subset_passes.png)
+
+![Plotting all passes](C:/Users/EricCoronel/Documents/various_DS_projects/Ag_Machine_Pass_Numbering/all_passes.png)
