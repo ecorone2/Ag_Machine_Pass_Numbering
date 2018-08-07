@@ -5,6 +5,7 @@ date: "August 6, 2018"
 output: html_document
 editor_options: 
   chunk_output_type: console
+  keep_md: true
 ---
 
 ```{r setup, include = FALSE}
@@ -135,6 +136,6 @@ ggplot(work_copy@data, aes(x = coords.x1, y = coords.x2, color = pass_scramble))
        color = "Passes \n (order was randomized)")
 
 ```
-![Plotting a subset of passes](C:/Users/EricCoronel/Documents/various_DS_projects/Ag_Machine_Pass_Numbering/subset_passes.png)
+![Plotting a subset of passes](https://github.com/ecorone2/Ag_Machine_Pass_Numbering/blob/master/subset_passes.png)
 
-![Plotting all passes](C:/Users/EricCoronel/Documents/various_DS_projects/Ag_Machine_Pass_Numbering/all_passes.png)
+![Plotting all passes](https://github.com/ecorone2/Ag_Machine_Pass_Numbering/blob/master/all_passes.png)
