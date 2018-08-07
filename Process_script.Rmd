@@ -2,10 +2,7 @@
 title: "Ag Machine Pass Numbering"
 author: "Eric Coronel"
 date: "August 6, 2018"
-output: html_document
-editor_options: 
-  chunk_output_type: inline
-  keep_md: true
+output: github_document
 ---
 
 ```{r setup, include = FALSE}
