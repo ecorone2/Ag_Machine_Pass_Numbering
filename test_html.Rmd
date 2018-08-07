@@ -18,7 +18,7 @@ Data collected by agricultural equipment is not user friendly, especially when w
 The code included here uses time difference in seconds between observations to separate machinery passes. The threshold for separating passes can be modified.
 
 ## Packages needed
-```{r packages, eval = F}
+```{r packages, eval = T, message = F, warning = F}
 
 library(dplyr)
 library(ggplot2)
@@ -31,7 +31,7 @@ library(rgdal)
 A publicly available seeding shapefile can be found at a [Deere website](https://developer.deere.com/#!documentation&doc=.%2Fmyjohndeere%2FfieldOperations.htm&anchor=). Within the website, search for "Click below to download sample shapefiles" and download the Seeding shapefile. The zip file needs to be decompressed. The `pointDropZ = TRUE` parameter is needed because the shapefile has an empty Z column; likely an error during the creation of the file.  
 I created a working copy to avoid manipulating the original file since it takes about 30 seconds to import the original shapefile.
 
-```{r import, eval = F}
+```{r import, eval = T}
 
 # Importing the shapefile
 seeding_shapefile <- readOGR(dsn = "C:/Users/EricCoronel/Documents/various_DS_projects/Ag_Machine_Pass_Numbering/primitives/seeding_shapefile", layer = "Merriweather Farms-JT-01-Corn", pointDropZ = TRUE)
@@ -53,7 +53,7 @@ This chunk does the following:
 Since data are arranged in ascending time order, the cumulative sum of the indicator variable gives us 
 the total number of passes.
 
-```{r processing_a, eval = F}
+```{r processing_a, eval = T}
 
 work_copy@data <- work_copy@data %>%
   mutate(datetime = as.POSIXct(Time, format = "%m/%d/%Y %H:%M:%S"),
@@ -69,7 +69,7 @@ Another useful attribute for grouping or subsetting is knowing the number of obs
 
 We first create a new file, `obs_pass`, with the variables mentioned above. 
 
-```{r obs_per_pass, eval = F}
+```{r obs_per_pass, eval = T}
 
 obs_pass <- work_copy@data %>%
   group_by(pass_num) %>%
@@ -86,7 +86,7 @@ This chunk:
 * Removes `datetime`, `diff1`, and `indicator` variables.
 * Makes actual pass numbers variable, `pass_num`, a factor.
 
-```{r joining, eval = F}
+```{r joining, eval = T}
 
 work_copy@data <- work_copy@data %>%
   left_join(obs_pass, by = "pass_num") %>%
@@ -99,7 +99,7 @@ work_copy@data <- work_copy@data %>%
 
 It is often useful to have the coordinates as part of the attribute table.
 
-```{r coords, eval = F}
+```{r coords, eval = T}
 
 # Creating file with coordinates
 xycoords <- work_copy %>%
@@ -116,7 +116,7 @@ work_copy@data <- work_copy@data %>%
 
 The variable `pass_scramble` is used for coloring to help with visualization.
 
-```{r plotting, eval = F}
+```{r plotting, eval = T}
 
 # Using a subset for faster display
 ggplot(filter(work_copy@data, pass_num %in% 20:25), 
@@ -136,6 +136,3 @@ ggplot(work_copy@data, aes(x = coords.x1, y = coords.x2, color = pass_scramble))
        color = "Passes \n (order was randomized)")
 
 ```
-![Plotting a subset of passes](https://github.com/ecorone2/Ag_Machine_Pass_Numbering/blob/master/subset_passes.png)
-
-![Plotting all passes](https://github.com/ecorone2/Ag_Machine_Pass_Numbering/blob/master/all_passes.png)
