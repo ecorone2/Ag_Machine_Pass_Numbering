@@ -7,7 +7,7 @@ editor_options:
   chunk_output_type: console
 ---
 
-```{r setup, include=FALSE}
+```{r setup, include = FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
@@ -91,5 +91,47 @@ work_copy@data <- work_copy@data %>%
   left_join(obs_pass, by = "pass_num") %>%
   select(-datetime, -diff1, -indicator) %>%
   mutate(pass_factor = factor(pass_num))
+
+```
+
+## Giving the coordinates for each point
+
+It is often useful to have the coordinates as part of the attribute table.
+
+```{r coords, eval = F}
+
+# Creating file with coordinates
+xycoords <- work_copy %>%
+  coordinates() %>%
+  data.frame
+
+# Joining the coordinates with the shapefile
+work_copy@data <- work_copy@data %>%
+  bind_cols(xycoords)
+
+```
+
+## Ploting final version
+
+The variable `pass_scramble` is used for coloring to help with visualization.
+
+```{r plotting, eval = F}
+
+# Using a subset for faster display
+ggplot(filter(work_copy@data, pass_num %in% 20:25), 
+       aes(x = coords.x1, y = coords.x2, color = pass_scramble)) +
+  geom_point() +
+  scale_color_hue(h = c(0, 360), c = 100, l = c(30, 60)) +
+  labs(x = "Longitude",
+       y = "Latitude",
+       color = "Passes \n (order was randomized)")
+
+# Plotting the entire shapefile
+ggplot(work_copy@data, aes(x = coords.x1, y = coords.x2, color = pass_scramble)) +
+  geom_point() +
+  scale_color_hue(h = c(0, 360), c = 100, l = c(30, 60)) +
+  labs(x = "Longitude",
+       y = "Latitude",
+       color = "Passes \n (order was randomized)")
 
 ```
