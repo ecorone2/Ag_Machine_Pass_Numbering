@@ -39,7 +39,7 @@ Once decompressed it can be imported using `rgdal::readORG` with `pointDropZ = T
 
 ```{r}
 # Importing the shapefile
-seeding_shapefile <- readOGR(dsn = files[5], layer = "Merriweather Farms-JT-01-Corn", pointDropZ = TRUE)
+seeding_shapefile <- readOGR(dsn = files[4], pointDropZ = T)
 
 # Working copy
 work_copy <- seeding_shapefile
@@ -68,34 +68,28 @@ work_copy@data <- work_copy@data %>%
 
 ## Calculating observations per pass
 
-Another useful attribute for grouping or subsetting is knowing the number of observations per pass. This code also creates a random order of pass numbers (`pass_scramble`) which is useful for later visualization.
-
-We first create a new file, `obs_pass`, with the variables mentioned above. 
+Another useful attribute for grouping or subsetting is knowing the number of observations per pass. This can be added with `dplyr::add_tally` which perform
 
 ```{r obs_per_pass, eval = T}
 
-obs_pass <- work_copy@data %>%
+work_copy@data <- work_copy@data %>%
   group_by(pass_num) %>%
-  summarize(obs_per_pass = n()) %>%
-  mutate(pass_scramble = factor(sample(pass_num)))
+  add_tally(pass_num) %>% 
+  ungroup()
 
 ```
 
-## Joining new data to seeding shapefile
+## Cleaning up temp columns
 
 This chunk:
 
-* Joins the `obs_pass` file to the seeding shapefile.
 * Removes `datetime`, `diff1`, and `indicator` variables.
-* Makes actual pass numbers variable, `pass_num`, a factor.
+* Makes actual pass numbers variable, `pass_num`, a factor for plotting.
 
-```{r joining, eval = T}
-
+```{r}
 work_copy@data <- work_copy@data %>%
-  left_join(obs_pass, by = "pass_num") %>%
   select(-datetime, -diff1, -indicator) %>%
   mutate(pass_factor = factor(pass_num))
-
 ```
 
 ## Giving the coordinates for each point
@@ -103,7 +97,6 @@ work_copy@data <- work_copy@data %>%
 It is often useful to have the coordinates as part of the attribute table.
 
 ```{r coords, eval = T}
-
 # Creating file with coordinates
 xycoords <- work_copy %>%
   coordinates() %>%
@@ -112,30 +105,25 @@ xycoords <- work_copy %>%
 # Joining the coordinates with the shapefile
 work_copy@data <- work_copy@data %>%
   bind_cols(xycoords)
-
 ```
 
 ## Ploting final version
 
-The variable `pass_scramble` is used for coloring to help with visualization.
-
 ```{r plotting, eval = T}
-
 # Using a subset for faster display
-ggplot(filter(work_copy@data, pass_num %in% 20:25), 
-       aes(x = coords.x1, y = coords.x2, color = pass_scramble)) +
+filter(work_copy@data, pass_num %in% 20:25) %>% 
+  ggplot(., aes(x = coords.x1, y = coords.x2, color = pass_factor)) +
   geom_point() +
-  scale_color_hue(h = c(0, 360), c = 100, l = c(30, 60)) +
+  scale_color_manual(values = sample(colors(nlevels(work_copy$pass_factor)))) +
   labs(x = "Longitude",
        y = "Latitude",
        color = "Passes \n (order was randomized)")
 
 # Plotting the entire shapefile
-ggplot(work_copy@data, aes(x = coords.x1, y = coords.x2, color = pass_scramble)) +
+ggplot(work_copy@data, aes(x = coords.x1, y = coords.x2, color = pass_factor)) +
   geom_point() +
-  scale_color_hue(h = c(0, 360), c = 100, l = c(30, 60)) +
+  scale_color_manual(values = sample(colors(nlevels(work_copy$pass_factor)))) +
   labs(x = "Longitude",
        y = "Latitude",
        color = "Passes \n (order was randomized)")
-
 ```

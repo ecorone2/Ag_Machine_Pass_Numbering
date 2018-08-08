@@ -46,11 +46,11 @@ about 30 seconds to import the original shapefile.
 
 ``` r
 # Importing the shapefile
-seeding_shapefile <- readOGR(dsn = files[5], layer = "Merriweather Farms-JT-01-Corn", pointDropZ = TRUE)
+seeding_shapefile <- readOGR(dsn = files[4], pointDropZ = T)
 ```
 
     ## OGR data source with driver: ESRI Shapefile 
-    ## Source: "/tmp/Rtmpf5M2Qf/doc/Merriweather Farms-JT-01-Corn.shx", layer: "Merriweather Farms-JT-01-Corn"
+    ## Source: "/tmp/RtmprEJgXU/doc/Merriweather Farms-JT-01-Corn.shp", layer: "Merriweather Farms-JT-01-Corn"
     ## with 63761 features
     ## It has 10 fields
 
@@ -83,33 +83,28 @@ work_copy@data <- work_copy@data %>%
 ## Calculating observations per pass
 
 Another useful attribute for grouping or subsetting is knowing the
-number of observations per pass. This code also creates a random order
-of pass numbers (`pass_scramble`) which is useful for later
-visualization.
-
-We first create a new file, `obs_pass`, with the variables mentioned
-above.
+number of observations per pass. This can be added with
+`dplyr::add_tally` which perform
 
 ``` r
-obs_pass <- work_copy@data %>%
+work_copy@data <- work_copy@data %>%
   group_by(pass_num) %>%
-  summarize(obs_per_pass = n()) %>%
-  mutate(pass_scramble = factor(sample(pass_num)))
+  add_tally(pass_num) %>% 
+  ungroup()
 ```
 
-## Joining new data to seeding shapefile
+## Cleaning up temp columns
 
 This chunk:
 
-  - Joins the `obs_pass` file to the seeding shapefile.
   - Removes `datetime`, `diff1`, and `indicator` variables.
-  - Makes actual pass numbers variable, `pass_num`, a factor.
+  - Makes actual pass numbers variable, `pass_num`, a factor for
+    plotting.
 
 <!-- end list -->
 
 ``` r
 work_copy@data <- work_copy@data %>%
-  left_join(obs_pass, by = "pass_num") %>%
   select(-datetime, -diff1, -indicator) %>%
   mutate(pass_factor = factor(pass_num))
 ```
@@ -132,15 +127,12 @@ work_copy@data <- work_copy@data %>%
 
 ## Ploting final version
 
-The variable `pass_scramble` is used for coloring to help with
-visualization.
-
 ``` r
 # Using a subset for faster display
-ggplot(filter(work_copy@data, pass_num %in% 20:25), 
-       aes(x = coords.x1, y = coords.x2, color = pass_scramble)) +
+filter(work_copy@data, pass_num %in% 20:25) %>% 
+  ggplot(., aes(x = coords.x1, y = coords.x2, color = pass_factor)) +
   geom_point() +
-  scale_color_hue(h = c(0, 360), c = 100, l = c(30, 60)) +
+  scale_color_manual(values = sample(colors(nlevels(work_copy$pass_factor)))) +
   labs(x = "Longitude",
        y = "Latitude",
        color = "Passes \n (order was randomized)")
@@ -150,9 +142,9 @@ ggplot(filter(work_copy@data, pass_num %in% 20:25),
 
 ``` r
 # Plotting the entire shapefile
-ggplot(work_copy@data, aes(x = coords.x1, y = coords.x2, color = pass_scramble)) +
+ggplot(work_copy@data, aes(x = coords.x1, y = coords.x2, color = pass_factor)) +
   geom_point() +
-  scale_color_hue(h = c(0, 360), c = 100, l = c(30, 60)) +
+  scale_color_manual(values = sample(colors(nlevels(work_copy$pass_factor)))) +
   labs(x = "Longitude",
        y = "Latitude",
        color = "Passes \n (order was randomized)")
