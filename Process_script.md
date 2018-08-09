@@ -39,7 +39,7 @@ seeding_shapefile <- readOGR(dsn = files[4], layer = "Merriweather Farms-JT-01-C
 ```
 
     ## OGR data source with driver: ESRI Shapefile 
-    ## Source: "C:\Users\EricCoronel\AppData\Local\Temp\Rtmp8mrVJ1\doc\Merriweather Farms-JT-01-Corn.shp", layer: "Merriweather Farms-JT-01-Corn"
+    ## Source: "C:\Users\EricCoronel\AppData\Local\Temp\RtmpiMakMc\doc\Merriweather Farms-JT-01-Corn.shp", layer: "Merriweather Farms-JT-01-Corn"
     ## with 63761 features
     ## It has 10 fields
 
@@ -51,13 +51,15 @@ work_copy <- seeding_shapefile
 First processing
 ----------------
 
-This chunk does the following:
+This step does the following:
 
--   Creates a datetime variable.
--   Calculates time difference in seconds among consecutive records.
--   Creates an indicator variable that assigns 0 if time difference is between 0 to 6 seconds, and 1 to all others.
+-   Creates a datetime variable (later removed).
+-   Calculates time difference in seconds among consecutive records (later removed).
+-   Creates an indicator variable that assigns 0 if time difference is between 0 to 6 seconds, and 1 to all others (later removed).
 -   Calculates the cumulative sum of the indicator variable. Since data are arranged in ascending time order, the cumulative sum of the indicator variable gives us the total number of passes.
 -   Creates `pass_factor`, which is `pass_num` formatted as a factor for later visualization.
+-   Removes `datetime`, `diff1`, and `indicator` variables.
+-   Adds the coordinate variables `coords.x1` and `coords.x2` as part of the attribute table.
 
 ``` r
 work_copy@data <- work_copy@data %>%
@@ -65,7 +67,11 @@ work_copy@data <- work_copy@data %>%
          diff1 = c(NA, diff(datetime)),
          indicator = ifelse(diff1 %in% c(0:6), 0, 1),
          pass_num = cumsum(indicator),
-         pass_factor = as.factor(pass_num))
+         pass_factor = as.factor(pass_num)) %>% 
+  select(-datetime, -diff1, -indicator) %>% 
+  bind_cols(work_copy %>%
+              coordinates() %>%
+              data.frame)
 ```
 
 Calculating observations per pass
@@ -77,22 +83,6 @@ Another useful attribute for grouping or subsetting is knowing the number of obs
 work_copy@data <- work_copy@data %>%
   group_by(pass_num) %>%
   mutate(obs_per_pass = n())
-```
-
-Dropping some variables and adding coordinates
-----------------------------------------------
-
-This chunk:
-
--   Removes `datetime`, `diff1`, and `indicator` variables.
--   Adds the coordinate variables `coords.x1` and `coords.x2` as part of the attribute table.
-
-``` r
-work_copy@data <- work_copy@data %>%
-  select(-datetime, -diff1, -indicator) %>% 
-  bind_cols(work_copy %>%
-              coordinates() %>%
-              data.frame)
 ```
 
 Ploting the final version
@@ -118,7 +108,7 @@ ggplot(work_copy@data, aes(x = coords.x1, y = coords.x2, color = pass_factor)) +
   scale_color_manual(values = sample(colors(nlevels(work_copy$pass_factor)))) +
   labs(x = "Longitude",
        y = "Latitude",
-       color = "Passes Number")
+       color = "Pass Number")
 ```
 
 ![](Process_script_files/figure-markdown_github/plotting-2.png)
