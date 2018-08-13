@@ -39,7 +39,7 @@ seeding_shapefile <- readOGR(dsn = files[4], layer = "Merriweather Farms-JT-01-C
 ```
 
     ## OGR data source with driver: ESRI Shapefile 
-    ## Source: "C:\Users\EricCoronel\AppData\Local\Temp\RtmpiMakMc\doc\Merriweather Farms-JT-01-Corn.shp", layer: "Merriweather Farms-JT-01-Corn"
+    ## Source: "C:\Users\EricCoronel\AppData\Local\Temp\RtmpmkAesE\doc\Merriweather Farms-JT-01-Corn.shp", layer: "Merriweather Farms-JT-01-Corn"
     ## with 63761 features
     ## It has 10 fields
 
@@ -112,3 +112,13 @@ ggplot(work_copy@data, aes(x = coords.x1, y = coords.x2, color = pass_factor)) +
 ```
 
 ![](Process_script_files/figure-markdown_github/plotting-2.png)
+
+Exporting the modified shapefile if needed outside of R
+-------------------------------------------------------
+
+``` r
+writeOGR(obj = work_copy, dsn = ".", layer = "Merriweather-seeding-passes", driver = "ESRI Shapefile")
+```
+
+    ## Warning in writeOGR(obj = work_copy, dsn = ".", layer = "Merriweather-
+    ## seeding-passes", : Field names abbreviated for ESRI Shapefile driver

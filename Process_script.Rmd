@@ -112,3 +112,11 @@ ggplot(work_copy@data, aes(x = coords.x1, y = coords.x2, color = pass_factor)) +
        color = "Pass Number")
 
 ```
+
+## Exporting the modified shapefile if needed outside of R
+
+```{r export, eval = T}
+
+writeOGR(obj = work_copy, dsn = ".", layer = "Merriweather-seeding-passes", driver = "ESRI Shapefile")
+
+```
